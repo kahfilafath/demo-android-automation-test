@@ -35,3 +35,4 @@ Note: You can use Appium Inspector to inspect elements on your Android app for l
 ▶️ Running the Test
 
 Use Gradle to execute the test: ./gradlew test -Dcucumber.filter.tags='${params.TAGS}'. or just simply click play button on CucumberRunner or feature file.
+You can see the demo of this project through this link : https://drive.google.com/file/d/1HXBVtKrOKo3dVAFTc_mee8kuQB6pRgbW/view?usp=sharing. 
