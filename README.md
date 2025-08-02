@@ -4,7 +4,7 @@
 
 📦 Setup & Requirements
 
-This project is built to demonstrate my capability to develop an Android automation test project using Appium and Java, intended for demonstration and reuse in real-world test automation scenarios.
+This project is built to demonstrate my capability to develop an Android automation test project using Appium, Cucumber, and Java. Intended for demonstration and reuse in real-world test automation scenarios.
 
 To run this project successfully, make sure you have the following tools and dependencies installed:
 
@@ -35,4 +35,10 @@ Note: You can use Appium Inspector to inspect elements on your Android app for l
 ▶️ Running the Test
 
 Use Gradle to execute the test: ./gradlew test -Dcucumber.filter.tags='${params.TAGS}'. or just simply click play button on CucumberRunner or feature file.
+
+
+## Test Result Reporting with Cucumber 
+<img width="1913" height="903" alt="image" src="https://github.com/user-attachments/assets/5c868a27-0da8-4f9d-a801-14443aae3f1a" />
+
+
 You can see the demo of this project through this link : https://drive.google.com/file/d/1HXBVtKrOKo3dVAFTc_mee8kuQB6pRgbW/view?usp=sharing. 
