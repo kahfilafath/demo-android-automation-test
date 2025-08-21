@@ -1,9 +1,9 @@
 package com.demo.android.automation.test.demo.steps;
 
 import com.demo.android.automation.test.demo.base.PageBaseObject;
+import com.demo.android.automation.test.demo.pages.CartPage;
 import com.demo.android.automation.test.demo.properties.OrderDataProperties;
 import com.demo.android.automation.test.demo.properties.RecipientDataTable;
-import io.appium.java_client.MobileBy;
 import io.cucumber.java.DataTableType;
 import io.cucumber.java.en.And;
 import io.cucumber.java.en.Given;
@@ -19,6 +19,8 @@ public class CartStepDefs extends PageBaseObject {
 
     @Autowired
     OrderDataProperties orderDataProperties;
+    @Autowired
+    CartPage cartPage;
 
     @DataTableType
     public RecipientDataTable recipientDataEntry(Map<String, String> entry){
@@ -35,66 +37,56 @@ public class CartStepDefs extends PageBaseObject {
 
     @Given("user on My Demo App Catalog Page")
     public void userOnMyDemoAppCatalogPage(){
-        waitUntilPresent(MobileBy.id("mTvTitle"));
-        Assertions.assertTrue(isDisplayed(MobileBy.id("mTvTitle")),"Page failed to load!");
+        Assertions.assertTrue(cartPage.isLabelHeaderDisplayed(),"Page failed to load!");
 
     }
 
     @When("user click product {string} on Catalog Page")
     public void userClickProductOnCatalogPage(String productName) {
-        click(MobileBy.xpath(String.format("//android.widget.ImageView[@content-desc='%s']",productName)));
+        cartPage.clickProductName(productName);
         orderDataProperties.setProductName(productName);
     }
 
     @And("user add {int} product qty on Product Detail Page")
     public void userAddProductQtyOnProductDetailPage(int qty) {
-        int i =0;
-        while( i < qty){
-            click(MobileBy.id("cartBt"));
-            i++;
-        }
-
+       cartPage.clickCartButton(qty);
     }
 
     @And("user click button add to cart on Product Detail Page")
     public void userClickButtonAddToCartOnProductDetailPage() {
-        click(MobileBy.id("cartRL"));
+        cartPage.clickCartButtonOnPdp();
     }
 
     @Then("user verify the total product price on Cart Page")
     public void userVerifyTheTotalProductPriceOnCartPage() {
-        String productPrice = getText(MobileBy.id("priceTV"));
-        String totalPrice = getText(MobileBy.id("totalPriceTV"));
-        int productQty = Integer.parseInt(getText(MobileBy.id("noTV")));
-        totalPrice.replace("$","").trim();
-        Double expectedTotalPrice = Double.parseDouble(productPrice.replace("$","").trim()) * productQty;
-        Assertions.assertEquals(expectedTotalPrice, Double.valueOf(totalPrice.replace("$","").trim()));
+        Double expectedTotalPrice = cartPage.getProductPrice() * cartPage.getProductQty();
+        Assertions.assertEquals(expectedTotalPrice,cartPage.getTotalProductPrice());
         orderDataProperties.setTotalPrice(expectedTotalPrice);
 
     }
 
     @When("user click checkout button on Cart Page")
     public void userClickCheckoutButtonOnCartPage() {
-        click(MobileBy.id("cartBt"));
+        cartPage.clickCheckoutButton();
     }
 
     @And("user fill out username and password on Login Page")
     public void userFillOutUsernameAndPasswordOnLoginPage() {
-        input(MobileBy.id("nameET"),orderDataProperties.getUsername());
-        input(MobileBy.id("passwordET"),orderDataProperties.getPassword());
-        click(MobileBy.id("loginBtn"));
+        cartPage.inputUsername(orderDataProperties.getUsername());
+        cartPage.inputPassword(orderDataProperties.getPassword());
+        cartPage.clickLoginButton();
     }
 
     @And("user fill out recipient data on Checkout Page:")
     public void userFillOutRecipientDataOnCheckoutPage(List<RecipientDataTable> recipientDataTables) {
         for(RecipientDataTable data : recipientDataTables){
-            input(MobileBy.id("fullNameET"),data.getFullname());
-            input(MobileBy.id("address1ET"),data.getAddressLine1());
-            input(MobileBy.id("address2ET"),data.getAddressLine2());
-            input(MobileBy.id("cityET"),data.getCity());
-            input(MobileBy.id("stateET"),data.getState());
-            input(MobileBy.id("zipET"),data.getZipCode());
-            input(MobileBy.id("countryET"),data.getCountry());
+            cartPage.inputFullname(data.getFullname());
+            cartPage.inputAddress1(data.getAddressLine1());
+            cartPage.inputAddress2(data.getAddressLine2());
+            cartPage.inputCity(data.getCity());
+            cartPage.inputState(data.getState());
+            cartPage.inputZipcode(data.getZipCode());
+            cartPage.inputCountry(data.getCountry());
 
             //store data on setter
             orderDataProperties.setFullname(data.getFullname());
@@ -110,49 +102,40 @@ public class CartStepDefs extends PageBaseObject {
 
     @And("user click button payment on Checkout Page")
     public void userClickButtonPaymentOnCheckoutPage() {
-        click(MobileBy.id("paymentBtn"));
+      cartPage.clickPaymentButton();
     }
 
     @When("user fill out payment credential on Payment Page")
     public void userFillOutPaymentCredentialOnPaymentPage() {
-        input(MobileBy.id("nameET"), orderDataProperties.getCardHolder());
-        input(MobileBy.id("cardNumberET"),orderDataProperties.getCardNumber());
-        input(MobileBy.id("expirationDateET"),orderDataProperties.getExpirationDate());
-        input(MobileBy.id("securityCodeET"),orderDataProperties.getSecurityCode());
-        click(MobileBy.id("paymentBtn"));
+        cartPage.inputCardHolder(orderDataProperties.getCardHolder());
+        cartPage.inputCardNumber(orderDataProperties.getCardNumber());
+        cartPage.inputCardExpiryDate(orderDataProperties.getExpirationDate());
+        cartPage.inputCardCvc(orderDataProperties.getSecurityCode());
+        cartPage.clickPaymentButton();
     }
 
     @And("user review the order summary prior place order on Review Order Page")
     public void userReviewTheOrderSummaryPriorPlaceOrderOnReviewOrderPage() {
-
-        Assertions.assertEquals(orderDataProperties.getProductName(),getText(MobileBy.id("titleTV")));
-        Assertions.assertEquals(orderDataProperties.getFullname(),getText(MobileBy.id("fullNameTV")));
-        Assertions.assertEquals(orderDataProperties.getAddress(),getText(MobileBy.id("addressTV")));
+        Assertions.assertEquals(orderDataProperties.getProductName(),cartPage.getProductNameOrder());
+        Assertions.assertEquals(orderDataProperties.getFullname(),cartPage.getRecipientNameOrder());
+        Assertions.assertEquals(orderDataProperties.getAddress(),cartPage.getRecipientAddressOrder());
         Assertions.assertEquals(orderDataProperties.getCity()+", "+orderDataProperties.getState()
-                ,getText(MobileBy.id("cityTV")));
+                ,cartPage.getRecipientCityOrder());
         Assertions.assertEquals(orderDataProperties.getCountry()+", "+orderDataProperties.getZipcode()
-                ,getText(MobileBy.id("countryTV")));
-
-        find(MobileBy.AndroidUIAutomator(String.format(
-                "new UiScrollable(new UiSelector().resourceIdMatches(\".*%s.*\")"
-                        + ".scrollable(true)).scrollIntoView(new UiSelector().resourceIdMatches(\".*%s.*\"))",
-                "checkoutSV", "billingAddressTV")));
-
-        Assertions.assertEquals(orderDataProperties.getCardHolder(),getText(MobileBy.id("cardHolderTV")));
-        Assertions.assertEquals(orderDataProperties.getCardNumber(),getText(MobileBy.id("cardNumberTV")));
-        Assertions.assertEquals(orderDataProperties.getExpirationDate(),getText(MobileBy.id("expirationDateTV"))
-                .replace("Exp: ","").trim());
-        Assertions.assertTrue(isDisplayed(MobileBy.id("amountTV")));
-        Double expectedFinalAmount = orderDataProperties.getTotalPrice() + Double.parseDouble
-                (getText(MobileBy.id("amountTV")).replace("$","").trim());
-        Assertions.assertEquals(expectedFinalAmount,Double.parseDouble(getText(MobileBy.id("totalAmountTV"))
-                .replace("$","").trim()));
-        click(MobileBy.id("paymentBtn"));
+                ,cartPage.getRecipientCountryOrder());
+        cartPage.scrollByIdToBillingAddress();
+        Assertions.assertEquals(orderDataProperties.getCardHolder(),cartPage.getRecipientCardHolder());
+        Assertions.assertEquals(orderDataProperties.getCardNumber(),cartPage.getRecipientCardNumber());
+        Assertions.assertEquals(orderDataProperties.getExpirationDate(),cartPage.getRecipientCardExpiryDate());
+        Assertions.assertTrue(cartPage.isProductAmountDisplayed());
+        Double expectedFinalAmount = orderDataProperties.getTotalPrice() + cartPage.getProductPriceAmount();
+        Assertions.assertEquals(expectedFinalAmount,cartPage.getTotalAmount());
+        cartPage.clickPaymentButton();
 
     }
 
     @Then("user successfully purchase the order by seeing {string} message on Thank You Page")
     public void userSuccessfullyPurchaseTheOrderBySeeingMessageOnThankYouPage(String message) {
-        Assertions.assertEquals(message,getText(MobileBy.id("completeTV")));
+        Assertions.assertEquals(message,cartPage.getOrderCompleted());
     }
 }
